@@ -3,20 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculator</title>
+
+    <title>Simple Calculator</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .calculator {
+            width: 340px;
+            background: #222;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-top: 0;
+        }
+
+        #display {
+            width: 100%;
+            height: 70px;
+            font-size: 30px;
+            text-align: right;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 10px;
+            background: white;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            height: 60px;
+            font-size: 22px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .operator {
+            background: #ff9500;
+            color: white;
+        }
+
+        .clear {
+            background: #ff3b30;
+            color: white;
+        }
+
+        .equal {
+            background: #34c759;
+            color: white;
+        }
+
+        .history {
+            background: white;
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .history h2 {
+            margin-top: 0;
+            font-size: 20px;
+        }
+
+        .history p {
+            margin: 5px 0;
+        }
+    </style>
 </head>
 
 <body>
 
-    <h1>Calculator</h1>
+    <div class="calculator">
 
-    <div>
-        <h2>History</h2>
-        <p>No calculations yet.</p>
+        <h1>Calculator</h1>
+
+        <input type="text" id="display" value="0" readonly>
+
+        <div class="buttons">
+
+            <button class="clear" onclick="clearCalculator()">C</button>
+            <button onclick="deleteNumber()">DEL</button>
+            <button onclick="addNumber('%')">%</button>
+            <button class="operator" onclick="setOperator('/')">÷</button>
+
+            <button onclick="addNumber('7')">7</button>
+            <button onclick="addNumber('8')">8</button>
+            <button onclick="addNumber('9')">9</button>
+            <button class="operator" onclick="setOperator('*')">×</button>
+
+            <button onclick="addNumber('4')">4</button>
+            <button onclick="addNumber('5')">5</button>
+            <button onclick="addNumber('6')">6</button>
+            <button class="operator" onclick="setOperator('-')">−</button>
+
+            <button onclick="addNumber('1')">1</button>
+            <button onclick="addNumber('2')">2</button>
+            <button onclick="addNumber('3')">3</button>
+            <button class="operator" onclick="setOperator('+')">+</button>
+
+            <button onclick="addNumber('0')">0</button>
+            <button onclick="addNumber('.')">.</button>
+            <button class="equal" onclick="showResult()">=</button>
+
+        </div>
+
+        <div class="history">
+            <h2>History</h2>
+            <div id="history">
+                <p>No calculations yet.</p>
+            </div>
+        </div>
+
     </div>
 
-    <div>
-        <button>7</button>
+    <script>
+
+        let firstNumber = "";
+        let secondNumber = "";
+        let operator = "";
+        let newNumber = true;
+
+        function addNumber(number) {
+
+            let display = document.getElementById("display");
+
+            if (newNumber) {
+                display.value = "";
+                newNumber = false;
+            }
+
+            if (number === "." && display.value.includes(".")) {
+                return;
+            }
+
+            if (number === "%") {
+                display.value = Number(display.value) / 100;
+                return;
+            }
+
+            display.value += number;
+
+            if (operator === "") {
+                firstNumber = display.value;
+            } else {
+                secondNumber = display.value;
+            }
+        }
+
+        function setOperator(selectedOperator) {
+
+            let display = document.getElementById("display");
+
+            firstNumber = display.value;
+            operator = selectedOperator;
+            newNumber = true;
+        }
+
+        function showResult() {
+
+            let display = document.getElementById("display");
+
+            secondNumber = display.value;
+
+            let num1 = Number(firstNumber);
+            let num2 = Number(secondNumber);
+            let result;
+
+            if (operator === "+") {
+                result = num1 + num2;
+            }
+            else if (operator === "-") {
+                result = num1 - num2;
+            }
+            else if (operator === "*") {
+                result = num1 * num2;
+            }
+            else if (operator === "/") {
+
+                if (num2 === 0) {
+                    display.value = "Cannot divide by 0";
+                    return;
+                }
+
+                result = num1 / num2;
+            }
+
+            display.value = result;
+
+            addHistory(firstNumber + " " + operator + " " + secondNumber + " = " + result);
+
+            firstNumber = result;
+            secondNumber = "";
+            operator = "";
+            newNumber = true;
+        }
+
+        function clearCalculator() {
+
+            document.getElementById("display").value = "0";
+
+            firstNumber = "";
+            secondNumber = "";
+            operator = "";
+            newNumber = true;
+        }
+
+        function deleteNumber() {
+
+            let display = document.getElementById("display");
+
+            display.value = display.value.slice(0, -1);
+
+            if (display.value === "") {
+                display.value = "0";
+            }
+        }
+
+        function addHistory(text) {
+
+            let history = document.getElementById("history");
+
+            if (history.innerHTML.includes("No calculations yet.")) {
+                history.innerHTML = "";
+            }
+
+            let item = document.createElement("p");
+
+            item.textContent = text;
+
+            history.appendChild(item);
+        }
+
+    </script>
+
+</body>
+</html>button>
         <button>8</button>
         <button>9</button>
         <button>÷</button>
